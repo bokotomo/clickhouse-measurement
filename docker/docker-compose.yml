@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  clickhouse:
+    build:
+      context: ./clickhouse/
+      dockerfile: Dockerfile
+    container_name: "clickhouse"
+    volumes:
+      - ../:/clickhouse
+    tty: true
+    privileged: true
+  client:
+    image: yandex/clickhouse-client
+    entrypoint:
+      - /bin/sleep
+    command:
+      - infinity
+    volumes:
+      - ../:/sample
+  server:
+    image: yandex/clickhouse-server
+    ports:
+      - 8123:8123
+    volumes:
+      - ./volume:/var/lib/clickhouse
+  db:
+    image: "mysql:8.0"
+    container_name: "clickhouse_mysql"
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ROOT_PASSWORD: dev
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
+    volumes:
+      - ./mysql/my.conf:/etc/mysql/conf.d/docker.cnf
+    ports:
+      - 3388:3306
